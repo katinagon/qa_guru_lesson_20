@@ -6,24 +6,26 @@ import pages.SearchPage;
 
 import static io.qameta.allure.Allure.step;
 
-public class OpenArticleTests {
+public class OpenArticleTests extends TestBase {
     MainPage mainPage = new MainPage();
     SearchPage searchPage = new SearchPage();
 
     @Test
     void openArticleTest() {
-        step("Открыть поиск и ввести 'Selenide'", () -> {
+        step("Нажимаем на поисковую строку", () -> {
             mainPage.clickSearchWikipediaIcon();
-            searchPage.searchPageSetValue("Selenide");
-
         });
 
-        step("Открыть первую статью из результатов", () -> {
+        step("Вводим 'Selenide' в поисковую строку", () -> {
+            searchPage.searchPageSetValue("Selenide");
+        });
+
+        step("Открываем первую статью из результатов", () -> {
             searchPage.clickTheFirstResult();
         });
 
-        step("Проверить найденный контен", () -> {
-            searchPage.verifyContent();
+        step("Проверяем наличие контента", () -> {
+            searchPage.checkArticleContent();
         });
     }
 }

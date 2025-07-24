@@ -1,39 +1,45 @@
 package drivers;
 
 import com.codeborne.selenide.WebDriverProvider;
-import helpers.MobileConfig;
-import org.aeonbits.owner.ConfigFactory;
+import config.BrowserStackConfig;
+import config.ConfigProvider;
+import io.appium.java_client.android.AndroidDriver;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.remote.RemoteWebDriver;
 
 import javax.annotation.Nonnull;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 public class BrowserStackDriver implements WebDriverProvider {
+    private static final BrowserStackConfig config = ConfigProvider.getBrowserStackConfig();
 
     @Nonnull
     @Override
     public WebDriver createDriver(@Nonnull Capabilities capabilities) {
-        MobileConfig config = ConfigFactory.create(MobileConfig.class);
-
         MutableCapabilities caps = new MutableCapabilities();
-        caps.setCapability("browserstack.user", System.getProperty("bs_user"));
-        caps.setCapability("browserstack.key", System.getProperty("bs_key"));
 
         caps.setCapability("app", config.app());
-        caps.setCapability("device", config.device());
-        caps.setCapability("os_version", config.osVersion());
+        caps.setCapability("deviceName", config.deviceName());
+        caps.setCapability("platformName", config.platformName());
+        caps.setCapability("platformVersion", config.platformVersion());
+        caps.setCapability("browserstackLocal", true);
 
-        caps.setCapability("project", "Mobile Tests");
-        caps.setCapability("build", "browserstack-build");
-        caps.setCapability("name", config.platformName() + " test");
+        MutableCapabilities bstackOptions = new MutableCapabilities();
+        bstackOptions.setCapability("userName", config.userName());
+        bstackOptions.setCapability("accessKey", config.accessKey());
+        bstackOptions.setCapability("projectName", config.projectName());
+        bstackOptions.setCapability("buildName", config.buildName());
+        bstackOptions.setCapability("sessionName", config.sessionName());
+        bstackOptions.setCapability("video", true);
+
+        caps.setCapability("bstack:options", bstackOptions);
 
         try {
-            return new RemoteWebDriver(new URL("https://hub.browserstack.com/wd/hub"), caps);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            return new AndroidDriver(new URL(config.remoteUrl()), caps);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Invalid URL for BrowserStack", e);
         }
     }
 }
